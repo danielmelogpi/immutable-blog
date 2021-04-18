@@ -32,7 +32,7 @@ contract ImmutableBlog {
   }
 
   function sendNewPost(string memory content) public {
-    uint newPostId = lastPost++;
+    uint newPostId = ++lastPost;
     require(bytes(content).length > 0);
     posts[newPostId] = Post(newPostId, msg.sender, content);
   }
