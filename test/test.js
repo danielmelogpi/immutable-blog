@@ -1,4 +1,4 @@
-const ImmutableBlog = artifacts.require('./ImmutableBlog.sol')
+const ImmutableBlogContract = artifacts.require('./ImmutableBlog.sol')
 
 require('chai')
   .use(require('chai-as-promised'))
@@ -8,7 +8,7 @@ contract('ImmutableBlog', ([deployer, author, tipper]) => {
   let ImmutableBlog
 
   before(async () => {
-    ImmutableBlog = await ImmutableBlog.deployed()
+    ImmutableBlog = await ImmutableBlogContract.deployed()
   })
 
   describe('deployment', async () => {
