@@ -1,3 +1,8 @@
+const chai = require('chai')
+const {expect} = chai
+import chaiAsPromised from 'chai-as-promised'
+chai.use(chaiAsPromised)
+
 const ImmutableBlog = artifacts.require('./ImmutableBlog.sol')
 
 require('chai')
@@ -41,6 +46,20 @@ contract('ImmutableBlog', (accounts) => {
       await blog.setMyNickname(newNickname)
       const currentNickname = (await blog.authors(firstAccount)).nickname
       assert.equal(newNickname, currentNickname)
+    })
+  })
+
+  describe('user posting content', async () => {
+    it ('can post valid content', async () => {
+      const postContent = 'Do you wanna hear?'
+      await blog.sendNewPost(postContent)
+      const postCountAfter = (await blog.lastPost()).toNumber()
+      const recoverPost = (await blog.posts(postCountAfter))
+      assert.equal(recoverPost.content, postContent)
+    })
+    it ('cant\' post empty content', async () => {
+      const postContent = ''
+      chai.expect(blog.sendNewPost(postContent)).to.eventually.be.rejected;
     })
   })
 
