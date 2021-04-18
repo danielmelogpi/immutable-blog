@@ -15,8 +15,8 @@ An experiment to showcase a microblog built on top of Ethereum network where aut
 
 ## Backlog
 [ ] User should be able to set it's nickaname
-[ ] User should be able to add new Posts
-[ ] There should be a list of the last posts, formatted as a timeline
+[x] User should be able to add new Posts
+[x] There should be a list of the last posts, formatted as a timeline
 [ ] User should be able to add friends
 [ ] The timeline should combine the current user and his/her friends posts, in inverse chronological order
 [ ] Posts should support images using IPFS as the hosting mechanism
