@@ -13,6 +13,7 @@ class App extends Component {
     const postCount = await this.getPostCount()
     this.setState({accounts, account: accounts[0], postCount})
     await this.getCurrentPage()
+    await this.getMyNickname()
   }
 
   async getCurrentPage() { // TODO fix pagination
@@ -21,6 +22,14 @@ class App extends Component {
 
   async getAccounts() {
     return await window.web3.eth.getAccounts()
+  }
+
+  async getMyNickname() {
+    if (!this.state.account) return ''
+    const me = await this.state.blog.methods.authors(this.state.account).call()
+    this.setState({
+      myNickname: me.nickname
+    })
   }
 
   async loadWeb3() {
@@ -64,11 +73,14 @@ class App extends Component {
       blog: null,
       timeline: [],
       postCount: null,
-      newPostContent: ''
+      newPostContent: '',
+      myNickname: '?'
     }
 
     this.handleChangePost = this.handleChangePost.bind(this)
     this.handleNewPost = this.handleNewPost.bind(this)
+    this.handleChangeNickname = this.handleChangeNickname.bind(this)
+    this.handleSaveNickname = this.handleSaveNickname.bind(this)
   }
 
   async getPostCount() {
@@ -81,7 +93,7 @@ class App extends Component {
   async getPostPage(offset, limit) {
     for (let i = offset + limit; i>=0; i--) {// TODO remote this sync loop
       let post = await this.state.blog.methods.posts(i).call()
-      if (post.content) {
+      if (post && post.content) {
         this.setState({
           timeline: [
             ...this.state.timeline,
@@ -112,30 +124,45 @@ class App extends Component {
     })
   }
 
+  handleChangeNickname(event) {
+    this.setState({myNickname: event.target.value});
+  }
+
+  async handleSaveNickname() {
+    await this.state.blog.methods.setMyNickname(this.state.myNickname).send({from: this.state.account})
+  }
+
   render() {
     return (<div>
       <section className="header-container">
         <h1>Immutable Blog</h1>
         <div className="account-selector">
-          Me: <select>
+          Me:
+          <select>
             {this.state.accounts.map(a => this.renderAccount(a))}
           </select>
+          <input type="text" value={this.state.myNickname} onChange={this.handleChangeNickname} />
+          <input type="button" value="Save nick" onClick={this.handleSaveNickname} disabled={!this.state.myNickname ? 'disabled' : ''} />
         </div>
       </section>
 
-      <section className="new-post-container">
-        <div className="post-container">
-          <textarea rows="3" value={this.state.newPostContent} onChange={this.handleChangePost} resize="0" ></textarea>
-          <input type="button" value="Post" onClick={this.handleNewPost} disabled={!this.state.newPostContent ? 'disabled' : ''} />
-        </div>
+      <section className="container">
+        <section className="new-post-container">
+          <div className="post-container">
+            <textarea rows="3" value={this.state.newPostContent} onChange={this.handleChangePost} resize="0" ></textarea>
+            <input type="button" value="Post" onClick={this.handleNewPost} disabled={!this.state.newPostContent ? 'disabled' : ''} />
+          </div>
+        </section>
+        
+        <section className="post-section">
+          <div className="post-container">
+            {this.state.timeline.map(post => (<Post post={post} />))}
+          </div>
+        </section>
+        <section className="footer">
+          <small><center>Contract: {this.state.contractAddress}</center></small>
+        </section>
       </section>
-      
-      <section className="post-section">
-        <div className="post-container">
-          {this.state.timeline.map(post => (<Post post={post} />))}
-        </div>
-      </section>
-      <div>Contract: {this.state.contractAddress}</div>
     </div>)
   }
 
