@@ -74,7 +74,8 @@ class App extends Component {
       timeline: [],
       postCount: null,
       newPostContent: '',
-      myNickname: '?'
+      myNickname: '?',
+      authors: {}
     }
 
     this.handleChangePost = this.handleChangePost.bind(this)
@@ -94,14 +95,35 @@ class App extends Component {
     for (let i = offset + limit; i>=0; i--) {// TODO remote this sync loop
       let post = await this.state.blog.methods.posts(i).call()
       if (post && post.content) {
+        const postAuthor = await this.getAuthor(post.author)
         this.setState({
           timeline: [
             ...this.state.timeline,
-            post
+            {
+              ...post,
+              author: postAuthor
+            }
           ]
         })
       }
     }
+  }
+
+  async getAuthor(authorAddr) {
+    const existingAuthor = this.state.authors[authorAddr]
+    if (existingAuthor) {
+      return existingAuthor
+    }
+    const author = await this.state.blog.methods.authors(authorAddr).call()
+    this.setState({
+      authors: {
+        ...this.state.authors,
+        ...{
+          [authorAddr] : author
+        }
+      }
+    })
+    return author
   }
 
   handleChangePost (event) {
@@ -118,7 +140,13 @@ class App extends Component {
     })
     this.setState({
       timeline: [
-        {id: 'new...', content: postContent},
+        {
+          id: 'new...',
+          content: postContent,
+          author: {
+            nickname: this.state.myNickname
+          }
+        },
         ...this.state.timeline
       ]
     })

@@ -9,7 +9,10 @@ export default class Post extends Component {
   render() {
     return (
       <div className="post" key={this.props.post.id}>
-        <div className="content">{this.props.post.content}</div>
+        <div className="content">
+          <div>{this.props.post.content}</div>
+          <small style={{float: 'right'}}><i>@{this.props.post.author.nickname}</i></small>
+        </div>
         <small className="footer">
           <small className="option" title="not implemented yet" style={{cursor: 'not-allowed'}}>LIKE</small>
           <small className="option" style={{textAlign: 'right', opacity: '0.5'}}>(#{this.props.post.id})</small>
